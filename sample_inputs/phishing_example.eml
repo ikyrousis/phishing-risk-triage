@@ -1,0 +1,14 @@
+From: IT Security <security-update@gmail.com>
+To: Student <student@university.edu>
+Reply-To: verify@account-security-check.com
+Return-Path: bounce@mailer-alert.net
+Subject: Urgent: verify your university account today
+MIME-Version: 1.0
+Content-Type: text/html; charset="utf-8"
+
+<html><body>
+<p>Dear User,</p>
+<p>We detected suspicious activity in your mailbox.</p>
+<p>Please <a href="http://account-security-check.com/login">verify your account immediately</a> or your access will be suspended today.</p>
+<p>Security Team</p>
+</body></html>

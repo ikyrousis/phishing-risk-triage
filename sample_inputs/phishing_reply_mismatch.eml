@@ -1,0 +1,13 @@
+Subject: Urgent account review
+From: Security Desk <alerts@university-mail.example.com>
+To: student@university.example.edu
+Reply-To: helpdesk@secure-login-check.example.net
+Return-Path: helpdesk@secure-login-check.example.net
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+
+Dear user,
+We detected unusual activity. Verify your account immediately using the secur=
+e link below.
+https://secure-login-check.example.net/auth

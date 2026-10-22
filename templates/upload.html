@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explainable phishing analysis for HTML, DOCX, and EML messages.">
+  <title>SignalCheck | Explainable Phishing Analysis</title>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&f[]=jet-brains-mono@400,500&display=swap" rel="stylesheet">
+  <style>
+    :root,[data-theme="light"]{
+      --bg:#f4f7f5;--surface:#ffffff;--surface-2:#eef3f0;--line:#d6dfda;
+      --text:#16211c;--muted:#5d6c64;--accent:#146b4d;--accent-hover:#0d513a;
+      --accent-soft:#d8ebe2;--danger:#a83b35;--danger-soft:#f7dfdc;
+      --warn:#9a6117;--warn-soft:#f7ead4;--safe:#27734f;--safe-soft:#dcece3;
+      --shadow:0 12px 35px rgba(25,47,37,.09);
+    }
+    [data-theme="dark"]{
+      --bg:#101512;--surface:#171e1a;--surface-2:#202923;--line:#334139;
+      --text:#e5ece8;--muted:#9aaba1;--accent:#72c69f;--accent-hover:#91d5b4;
+      --accent-soft:#253f33;--danger:#ee8982;--danger-soft:#462c2b;
+      --warn:#efb35e;--warn-soft:#463823;--safe:#7bcca7;--safe-soft:#263e32;
+      --shadow:0 14px 42px rgba(0,0,0,.28);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{font-size:16px;text-size-adjust:none;-webkit-font-smoothing:antialiased}
+    body{
+      min-height:100dvh;background:var(--bg);color:var(--text);
+      font-family:"Satoshi","Segoe UI",sans-serif;line-height:1.55;
+      transition:background 180ms ease,color 180ms ease;
+    }
+    button,input{font:inherit}
+    button{cursor:pointer}
+    .skip-link{position:fixed;left:1rem;top:-5rem;background:var(--text);color:var(--bg);padding:.75rem 1rem;z-index:10}
+    .skip-link:focus{top:1rem}
+    .shell{max-width:1120px;margin:0 auto;padding:1.5rem clamp(1rem,4vw,3rem) 4rem}
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2.5rem}
+    .brand{display:flex;align-items:center;gap:.75rem;font-weight:700;letter-spacing:-.02em}
+    .brand svg{width:2rem;height:2rem;color:var(--accent)}
+    .theme-toggle{
+      min-width:44px;min-height:44px;border:1px solid var(--line);border-radius:.5rem;
+      background:var(--surface);color:var(--text);display:grid;place-items:center;
+    }
+    .theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
+    .intro{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(18rem,.85fr);gap:3rem;align-items:end;margin-bottom:2rem}
+    .eyebrow{font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.75rem}
+    h1{font-size:clamp(1.8rem,4vw,2.25rem);line-height:1.08;letter-spacing:-.045em;max-width:18ch}
+    .lede{color:var(--muted);max-width:55ch;margin-top:1rem}
+    .method-note{border-top:1px solid var(--line);padding-top:1rem;color:var(--muted);font-size:.9rem}
+    .upload-panel{
+      background:var(--surface);border:1px solid var(--line);border-radius:1rem;
+      padding:1.5rem;box-shadow:var(--shadow);display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:end;
+    }
+    .field label{display:block;font-weight:600;margin-bottom:.5rem}
+    .field small{display:block;color:var(--muted);margin-top:.45rem}
+    input[type=file]{
+      width:100%;min-height:48px;padding:.65rem;border:1px solid var(--line);
+      border-radius:.5rem;background:var(--surface-2);color:var(--text);
+    }
+    input[type=file]::file-selector-button{
+      border:0;border-right:1px solid var(--line);background:transparent;color:var(--text);
+      font-weight:600;padding:.35rem .9rem .35rem .25rem;margin-right:.9rem;cursor:pointer;
+    }
+    .primary{
+      min-height:48px;border:0;border-radius:.5rem;background:var(--accent);color:#fff;
+      padding:.7rem 1.25rem;font-weight:700;white-space:nowrap;
+    }
+    [data-theme="dark"] .primary{color:#102018}
+    .primary:hover{background:var(--accent-hover)}
+    :focus-visible{outline:3px solid color-mix(in srgb,var(--accent),transparent 45%);outline-offset:3px}
+    .error{
+      margin-top:1rem;padding:1rem;background:var(--danger-soft);color:var(--danger);
+      border-radius:.5rem;font-weight:600;
+    }
+    .results{margin-top:2rem}
+    .verdict{
+      display:grid;grid-template-columns:minmax(0,1fr) minmax(18rem,.65fr);gap:1.5rem;
+      padding:1.5rem;background:var(--surface);border:1px solid var(--line);border-radius:1rem;box-shadow:var(--shadow);
+    }
+    .status-line{display:flex;align-items:center;gap:.65rem;margin-bottom:.75rem}
+    .status-dot{width:.65rem;height:.65rem;border-radius:50%;background:currentColor;flex:0 0 auto}
+    .band-high{color:var(--danger)}.band-medium{color:var(--warn)}.band-low{color:var(--safe)}
+    h2{font-size:clamp(1.45rem,3vw,1.9rem);line-height:1.15;letter-spacing:-.025em}
+    h3{font-size:1.05rem;line-height:1.25}
+    .filename{font-family:"JetBrains Mono",monospace;color:var(--muted);font-size:.78rem;margin-top:.45rem;overflow-wrap:anywhere}
+    .recommendation{margin-top:1.25rem;padding:1rem;border-radius:.65rem;background:var(--surface-2)}
+    .recommendation strong{display:block;margin-bottom:.25rem}
+    .score-panel{display:grid;grid-template-columns:7.25rem 1fr;gap:1.25rem;align-items:center}
+    .meter{
+      --angle:0deg;width:7.25rem;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;
+      background:conic-gradient(currentColor var(--angle),var(--surface-2) 0);
+    }
+    .meter::before{content:"";width:5.35rem;aspect-ratio:1;border-radius:50%;background:var(--surface);grid-area:1/1}
+    .meter-value{grid-area:1/1;z-index:1;text-align:center;font-weight:700;font-size:1.35rem;color:var(--text)}
+    .meter-value small{display:block;color:var(--muted);font-size:.7rem;font-weight:500;text-transform:uppercase;letter-spacing:.08em}
+    .score-list{display:grid;gap:.6rem}
+    .score-row{display:flex;justify-content:space-between;gap:1rem;padding-bottom:.55rem;border-bottom:1px solid var(--line);font-size:.88rem}
+    .score-row:last-child{border:0;padding:0}
+    .score-row span{color:var(--muted)}.score-row strong{font-family:"JetBrains Mono",monospace}
+    .content-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(18rem,.8fr);gap:1.5rem;margin-top:1.5rem}
+    .card{background:var(--surface);border:1px solid var(--line);border-radius:.8rem;padding:1.25rem}
+    .card-head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:1rem}
+    .count{font-family:"JetBrains Mono",monospace;color:var(--muted);font-size:.78rem}
+    .signal-list{list-style:none;display:grid;gap:.65rem}
+    .signal-list li{padding:.8rem .9rem;background:var(--surface-2);border-radius:.5rem;font-size:.92rem}
+    .empty{color:var(--muted);padding:.8rem 0}
+    .contribution-list{display:grid;gap:.7rem}
+    .contribution{display:grid;grid-template-columns:1fr auto;gap:.25rem .8rem}
+    .contribution-name{font-size:.9rem}.contribution-effect{font-family:"JetBrains Mono",monospace;font-size:.8rem;font-weight:600}
+    .increase{color:var(--danger)}.decrease{color:var(--safe)}
+    .bar{grid-column:1/-1;height:.35rem;background:var(--surface-2);border-radius:999px;overflow:hidden}
+    .bar span{display:block;height:100%;width:var(--width);background:currentColor;border-radius:inherit}
+    details{margin-top:1.5rem;background:var(--surface);border:1px solid var(--line);border-radius:.8rem}
+    summary{cursor:pointer;padding:1rem 1.25rem;font-weight:700;min-height:44px}
+    .feature-wrap{overflow-x:auto;padding:0 1.25rem 1.25rem}
+    table{width:100%;border-collapse:collapse;font-size:.88rem}
+    th,td{text-align:left;padding:.65rem;border-bottom:1px solid var(--line)}
+    th{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em}
+    td:last-child{font-family:"JetBrains Mono",monospace}
+    .disclaimer{margin-top:1.5rem;color:var(--muted);font-size:.83rem;max-width:80ch}
+    @media(max-width:800px){
+      .intro,.verdict,.content-grid{grid-template-columns:1fr;gap:1.25rem}
+      .upload-panel{grid-template-columns:1fr}.primary{width:100%}
+    }
+    @media(max-width:460px){
+      .shell{padding-inline:1rem}.score-panel{grid-template-columns:1fr}
+      .meter{margin:0 auto}.topbar{margin-bottom:1.75rem}
+    }
+    @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to analysis</a>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand" aria-label="SignalCheck">
+        <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <path d="M16 3 27 7.5v7.7c0 6.2-4.4 11.6-11 13.8C9.4 26.8 5 21.4 5 15.2V7.5L16 3Z" stroke="currentColor" stroke-width="2.2"/>
+          <path d="m10.5 16 3.4 3.4 7.8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>SignalCheck</span>
+      </div>
+      <button class="theme-toggle" type="button" data-theme-toggle data-testid="button-theme" aria-label="Switch color theme">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/>
+        </svg>
+      </button>
+    </header>
+
+    <main id="main">
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Hybrid detection laboratory</p>
+          <h1 id="page-title">Inspect the evidence behind a phishing prediction.</h1>
+          <p class="lede">Upload a message file to combine machine-learning probability, linguistic cues, URL analysis, and email-header checks in one explainable assessment.</p>
+        </div>
+        <p class="method-note">Active model: <strong>{{ model_name|title }}</strong>. Predictions support review; they do not establish sender trust or replace gateway controls.</p>
+      </section>
+
+      <section class="upload-panel" aria-label="File analysis">
+        <form method="post" enctype="multipart/form-data" style="display:contents">
+          <div class="field">
+            <label for="file">Message file</label>
+            <input id="file" data-testid="input-file" type="file" name="file" accept=".html,.docx,.eml" required>
+            <small>HTML, DOCX, or EML · maximum 5 MB</small>
+          </div>
+          <button class="primary" data-testid="button-analyze" type="submit">Analyze message</button>
+        </form>
+      </section>
+
+      {% if error_message %}
+      <div class="error" data-testid="status-error" role="alert">{{ error_message }}</div>
+      {% endif %}
+
+      {% if result %}
+      <section class="results" aria-live="polite">
+        <article class="verdict">
+          <div>
+            <div class="status-line {{ 'band-' + risk_band }}">
+              <span class="status-dot" aria-hidden="true"></span>
+              <strong>{{ risk_band|upper }} RISK</strong>
+            </div>
+            <h2 data-testid="status-verdict">{{ result }}</h2>
+            <p class="filename">{{ filename }}</p>
+            <div class="recommendation">
+              <strong>Recommended response</strong>
+              <span>{{ recommendation }}</span>
+            </div>
+          </div>
+          <div class="score-panel">
+            <div class="meter {{ 'band-' + risk_band }}" style="--angle:{{ risk_percent * 3.6 }}deg" aria-label="Risk score {{ risk_percent }} percent">
+              <div class="meter-value" data-testid="value-risk">{{ risk_percent }}%<small>combined</small></div>
+            </div>
+            <div class="score-list">
+              <div class="score-row"><span>Model probability</span><strong>{{ "%.1f"|format(model_probability * 100) }}%</strong></div>
+              <div class="score-row"><span>Model contribution</span><strong>+{{ "%.1f"|format(risk_breakdown.model_component * 100) }}</strong></div>
+              <div class="score-row"><span>Heuristic contribution</span><strong>+{{ "%.1f"|format(risk_breakdown.heuristic_component * 100) }}</strong></div>
+              <div class="score-row"><span>Triggered cues</span><strong>{{ cue_count }}</strong></div>
+            </div>
+          </div>
+        </article>
+
+        <div class="content-grid">
+          <article class="card">
+            <div class="card-head"><h3>Why this result</h3><span class="count">{{ cue_count }} cue{% if cue_count != 1 %}s{% endif %}</span></div>
+            {% if cues %}
+            <ul class="signal-list">
+              {% for cue in cues %}<li>{{ cue }}</li>{% endfor %}
+            </ul>
+            {% else %}
+            <p class="empty">No rule-based phishing cues were detected in this file.</p>
+            {% endif %}
+          </article>
+
+          <aside class="card">
+            <div class="card-head"><h3>Risk contributors</h3><span class="count">weighted</span></div>
+            {% if risk_breakdown.contributions %}
+            <div class="contribution-list">
+              {% for item in risk_breakdown.contributions[:6] %}
+              <div class="contribution">
+                <span class="contribution-name">{{ item.label }}</span>
+                <span class="contribution-effect {{ item.direction }}">{% if item.direction == "increase" %}+{% else %}−{% endif %}{{ "%.0f"|format(item.effect * 100) }}</span>
+                <div class="bar {{ item.direction }}"><span style="--width:{{ [item.effect * 333, 100]|min }}%"></span></div>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="empty">No heuristic contributors increased this score.</p>
+            {% endif %}
+          </aside>
+        </div>
+
+        <details>
+          <summary>Technical feature values</summary>
+          <div class="feature-wrap">
+            <table>
+              <thead><tr><th scope="col">Feature</th><th scope="col">Value</th></tr></thead>
+              <tbody>
+                {% for key, value in features.items() %}
+                <tr><td>{{ key|replace("_", " ")|title }}</td><td>{{ value }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </details>
+        <p class="disclaimer">A low score means that this implementation found limited evidence; it does not prove that a message is safe. Destination reputation, sender authentication, attachment sandboxing, and organizational context remain outside this laboratory model.</p>
+      </section>
+      {% endif %}
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const button = document.querySelector("[data-theme-toggle]");
+      let theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      const render = () => {
+        root.dataset.theme = theme;
+        button.setAttribute("aria-label", `Switch to ${theme === "dark" ? "light" : "dark"} mode`);
+      };
+      button.addEventListener("click", () => {
+        theme = theme === "dark" ? "light" : "dark";
+        render();
+      });
+      render();
+    })();
+  </script>
+</body>
+</html>

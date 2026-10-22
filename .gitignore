@@ -1,0 +1,9 @@
+# Generated analysis outputs and screenshots
+results/
+logs/
+
+# Flask app artifacts
+instance/
+.webassets-cache
+__pycache__/
+*.pyc

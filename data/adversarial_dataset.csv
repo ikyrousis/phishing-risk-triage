@@ -1,0 +1,13 @@
+text,label,scenario
+"Cybersecurity workshop exercise: Urgent: verify your password now and click here are examples of phishing language. Do not follow such requests.",legitimate,"Security education quoting phishing language"
+"The account-suspension case study asks students to identify phrases such as reset your password immediately and final warning.",legitimate,"Academic case study quoting threat language"
+"IT Security awareness reminder: never provide credentials or verification codes after clicking an email link.",legitimate,"Defensive warning containing credentials and authority terms"
+"Finance training will cover fraudulent invoices, payroll diversion, and urgent wire-transfer requests. No user action is required.",legitimate,"Training announcement containing financial pressure terms"
+"Hello team, sign in through the official institutional portal when convenient to view next semester's timetable.",legitimate,"Normal portal authentication request"
+"HR Office asks staff to confirm attendance by replying to this email before Friday.",legitimate,"Routine organizational request"
+"Hi Alex, I put the revised notes in our shared folder. Could you open the attached document before our meeting?",phishing,"Malicious attachment disguised as familiar collaboration"
+"The document you requested is ready. View it at https://files.example.com/view/4832 when you have a moment.",phishing,"Low-pressure credential-harvesting link on neutral domain"
+"Here are the minutes from yesterday. Please review the attached file before Monday.",phishing,"Malicious attachment with ordinary business wording"
+"A colleague shared a project brief with you at https://workspace.example.net/open/7821.",phishing,"Generic collaboration lure without urgency"
+"Your travel itinerary is available at https://travel-docs.example.net/a32 for reference.",phishing,"Travel-themed malicious link without credential language"
+"A new voicemail is available at https://voice-message.example.org/82. Listen when convenient.",phishing,"Voicemail lure using calm language"
